@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-export const createUserWithEmailAndPasswordInput = z.object({
+export const createUserWithEmailAndPasswordInputModel = z.object({
   fullName: z.string().describe("full name of the user"),
   email: z.string().email().describe("email address of the user"),
   password: z.string().describe("password of the user"),
 });
 
-export type CreateUserWithEmailAndPasswordInputType = z.infer<
-  typeof createUserWithEmailAndPasswordInput
->;
+export const createUserWithEmailAndPasswordOutputModel = z.object({
+  id: z.string().describe("id of the created user"),
+});

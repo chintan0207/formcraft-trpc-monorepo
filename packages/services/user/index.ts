@@ -1,28 +1,49 @@
-import { db } from "@repo/database";
-import { usersTable } from "@repo/database/schema";
-import { env } from "../env";
-import { googleOAuth2Client } from "../clients/google-oauth";
-import { GetAuthenticationMethodOutputSchema } from "./model";
+import { db, eq } from "@repo/database";
+import { usersTable } from "@repo/database/models/user";
+import { createHmac, randomBytes } from "node:crypto";
 
+import {
+  createUserWithEmailAndPasswordInput,
+  type CreateUserWithEmailAndPasswordInputType,
+} from "./model";
 class UserService {
-  public async getAuthenticationMethods(): Promise<
-    ReadonlyArray<GetAuthenticationMethodOutputSchema>
-  > {
-    const supportedAuthenticationProviders: GetAuthenticationMethodOutputSchema[] = [];
+  private async getUserByEmail(email: string) {
+    const result = await db.select().from(usersTable).where(eq(usersTable.email, email)).limit(1);
+    if (!result || result.length === 0) return null;
+    return result;
+  }
 
-    const isGoogleConfigured = !!(env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET);
+  public async createUserWithEmailAndPassword(payload: CreateUserWithEmailAndPasswordInputType) {
+    const { fullName, email, password } =
+      await createUserWithEmailAndPasswordInput.parseAsync(payload);
 
-    if (isGoogleConfigured) {
-      const url = googleOAuth2Client.generateAuthUrl();
-      supportedAuthenticationProviders.push({
-        provider: "GOOGLE_OAUTH",
-        displayName: "Google",
-        displayText: "Signin with Google",
-        authUrl: url,
+    //check if user with the email already exists
+    const existingUser = await this.getUserByEmail(email);
+    if (existingUser) throw new Error("User with this email already exists");
+
+    //create salt and hash the password using the salt
+    const salt = randomBytes(16).toString("hex");
+    const hash = createHmac("sha256", salt).update(password).digest("hex");
+
+    //create user in DB
+    const userInsertResult = await db
+      .insert(usersTable)
+      .values({
+        fullName,
+        email,
+        password: hash,
+        salt,
+      })
+      .returning({
+        id: usersTable.id,
       });
-    }
 
-    return supportedAuthenticationProviders;
+    if (!userInsertResult || userInsertResult.length === 0 || !userInsertResult[0]?.id)
+      throw new Error("Something went wrong while creating the user");
+
+    return {
+      id: userInsertResult[0].id,
+    };
   }
 }
 
