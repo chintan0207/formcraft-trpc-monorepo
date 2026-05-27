@@ -1,9 +1,11 @@
+import { JWT } from "google-auth-library";
 import { z } from "zod";
 
 const envSchema = z.object({
   GOOGLE_OAUTH_CLIENT_ID: z.string(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string(),
   GOOGLE_OAUTH_REDIRECT_URI: z.string(),
+  JWT_SECRET_KEY: z.string().describe("secret key for signing JWT tokens"),
 });
 
 function createEnv(env: NodeJS.ProcessEnv) {
