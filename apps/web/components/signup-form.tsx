@@ -12,6 +12,7 @@ import { useSignup } from "../hooks/api/auth";
 import { Button } from "~/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
+import { useRouter } from "next/navigation";
 
 const signupSchema = z
   .object({
@@ -31,6 +32,8 @@ const signupSchema = z
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
+    const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -58,7 +61,9 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
         password: data.password,
       });
 
-      console.log("User created:", response);
+      if (response) {
+        router.replace("/dashboard");
+      }
     } catch (err) {
       console.error("Signup failed:", err);
     }
