@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { IconCirclePlus, IconFileDescription } from "@tabler/icons-react";
+import Link from "next/link";
+import { IconCirclePlus, IconExternalLink } from "@tabler/icons-react";
 import { toast } from "sonner";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -23,57 +25,47 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { Textarea } from "~/components/ui/textarea";
-import { useCreateForm } from "~/hooks/api/form";
+import { useCreateForm, useListForms } from "~/hooks/api/form";
 
-const forms = [
-  {
-    name: "Customer feedback",
-    description: "Collect product feedback and satisfaction scores.",
-    responses: 128,
-  },
-  {
-    name: "Lead capture",
-    description: "Qualify inbound interest from the marketing site.",
-    responses: 42,
-  },
-  {
-    name: "Event registration",
-    description: "Manage attendee details for upcoming sessions.",
-    responses: 76,
-  },
-];
+function formatDate(date: Date | string | null) {
+  if (!date) return "Not available";
+
+  return new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(date));
+}
 
 export default function FormsPage() {
   const [open, setOpen] = React.useState(false);
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
-  const [createdForms, setCreatedForms] = React.useState<
-    {
-      id: string;
-      title: string;
-      description: string | null;
-    }[]
-  >([]);
   const { createFormAsync, isPending } = useCreateForm();
+  const {
+    data: forms = [],
+    error: listFormsError,
+    isError: isListFormsError,
+    isLoading: isListFormsLoading,
+  } = useListForms();
 
   const handleCreateForm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
-      const form = await createFormAsync({
+      await createFormAsync({
         title,
         description: description.trim() || undefined,
       });
 
-      setCreatedForms((currentForms) => [
-        {
-          id: form.id,
-          title,
-          description: description.trim() || null,
-        },
-        ...currentForms,
-      ]);
       setTitle("");
       setDescription("");
       setOpen(false);
@@ -146,71 +138,65 @@ export default function FormsPage() {
         </Dialog>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {createdForms.map((form) => (
-            <Card key={form.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <IconFileDescription className="mt-1 size-5 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Draft</span>
-                </div>
-                <CardTitle className="text-base">{form.title}</CardTitle>
-                <CardDescription>
-                  {form.description || "No description added."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="outline" className="w-full">
-                  Open form
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-          {forms.map((form) => (
-            <Card key={form.name}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <IconFileDescription className="mt-1 size-5 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {form.responses} responses
-                  </span>
-                </div>
-                <CardTitle className="text-base">{form.name}</CardTitle>
-                <CardDescription>{form.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button variant="outline" className="w-full">
-                  Open form
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Quick draft</CardTitle>
-            <CardDescription>
-              Start a simple form structure before adding fields.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="form-name">Form name</Label>
-              <Input id="form-name" placeholder="Untitled form" />
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Your forms</CardTitle>
+          <CardDescription>
+            Open a form to edit fields and continue building it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isListFormsLoading ? (
+            <div className="rounded-md border p-6 text-sm text-muted-foreground">
+              Loading forms...
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="form-description">Description</Label>
-              <Textarea
-                id="form-description"
-                placeholder="What should respondents know?"
-              />
+          ) : isListFormsError ? (
+            <div className="rounded-md border border-destructive/40 p-6 text-sm text-destructive">
+              {listFormsError?.message || "Unable to load forms"}
             </div>
-            <Button className="w-full">Create draft</Button>
-          </CardContent>
-        </Card>
-      </div>
+          ) : forms.length === 0 ? (
+            <div className="rounded-md border p-6 text-sm text-muted-foreground">
+              No forms yet. Create your first form to start building.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead className="w-28 text-right">Builder</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {forms.map((form) => (
+                  <TableRow key={form.id}>
+                    <TableCell className="font-medium">{form.title}</TableCell>
+                    <TableCell className="max-w-[360px] truncate text-muted-foreground">
+                      {form.description || "No description added."}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">Draft</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(form.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={`/dashboard/forms/${form.id}`}>
+                          <IconExternalLink />
+                          Open
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
