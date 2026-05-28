@@ -1,5 +1,5 @@
 import { userService } from "../../services";
-import { publicProcedure, router } from "../../trpc";
+import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
 import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
 import { generatePath } from "../../utils/path-generator";
 import {
@@ -52,7 +52,7 @@ export const authRouter = router({
       return { id };
     }),
 
-  getLoggedInUserInfo: publicProcedure
+  getLoggedInUserInfo: authenticatedProcedure
     .meta({
       openapi: { method: "GET", path: getPath("/getLoggedInUserInfo"), tags: TAGS },
     })
@@ -62,8 +62,9 @@ export const authRouter = router({
       const token = getAuthenticationCookie(ctx);
       if (!token) throw new Error("Unauthorized access");
 
-      const { id, email, fullName, profileImageUrl } =
-        await userService.verifyAndDecodeUserToken(token);
-      return { id, email, fullName, profileImageUrl: profileImageUrl };
+      const { id, email, fullName, profileImageUrl } = await userService.getUserInfoById(
+        ctx.user.id,
+      );
+      return { id, email, fullName, profileImageUrl };
     }),
 });
