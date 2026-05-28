@@ -54,7 +54,7 @@ export const authRouter = router({
 
   getLoggedInUserInfo: authenticatedProcedure
     .meta({
-      openapi: { method: "GET", path: getPath("/getLoggedInUserInfo"), tags: TAGS },
+      openapi: { method: "GET", path: getPath("/getLoggedInUserInfo"), tags: TAGS, protect: true },
     })
     .input(getLoggedInUserInfoInputModel)
     .output(getLoggedInUserInfoOutputModel)

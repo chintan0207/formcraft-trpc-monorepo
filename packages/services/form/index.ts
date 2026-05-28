@@ -25,7 +25,11 @@ class FormService {
       throw new Error("Something went wrong while creating the form");
     }
 
-    return formInsertResult[0];
+    const formId = formInsertResult[0].id;
+
+    return {
+      id: formId,
+    };
   }
 }
 
