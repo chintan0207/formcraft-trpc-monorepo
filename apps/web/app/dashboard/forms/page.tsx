@@ -2,18 +2,20 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { IconCirclePlus, IconExternalLink } from "@tabler/icons-react";
+import { IconCirclePlus } from "@tabler/icons-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
+import { IconDotsVertical, IconEye, IconCopy, IconTrash } from "@tabler/icons-react";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -94,9 +96,7 @@ export default function FormsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create form</DialogTitle>
-              <DialogDescription>
-                Add the basic details for your new form.
-              </DialogDescription>
+              <DialogDescription>Add the basic details for your new form.</DialogDescription>
             </DialogHeader>
             <form className="grid gap-4" onSubmit={handleCreateForm}>
               <div className="grid gap-2">
@@ -141,9 +141,7 @@ export default function FormsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Your forms</CardTitle>
-          <CardDescription>
-            Open a form to edit fields and continue building it.
-          </CardDescription>
+          <CardDescription>Open a form to edit fields and continue building it.</CardDescription>
         </CardHeader>
         <CardContent>
           {isListFormsLoading ? (
@@ -166,29 +164,77 @@ export default function FormsPage() {
                   <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead className="w-28 text-right">Builder</TableHead>
+                  <TableHead className="w-[280px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {forms.map((form) => (
                   <TableRow key={form.id}>
                     <TableCell className="font-medium">{form.title}</TableCell>
+
                     <TableCell className="max-w-[360px] truncate text-muted-foreground">
                       {form.description || "No description added."}
                     </TableCell>
+
                     <TableCell>
                       <Badge variant="secondary">Draft</Badge>
                     </TableCell>
+
                     <TableCell className="text-muted-foreground">
                       {formatDate(form.createdAt)}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/dashboard/forms/${form.id}`}>
-                          <IconExternalLink />
-                          Open
-                        </Link>
-                      </Button>
+
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        {/* BUILDER */}
+                        <Button asChild size="sm" variant="outline">
+                          <Link href={`/dashboard/forms/${form.id}`}>Builder</Link>
+                        </Button>
+
+                        {/* SUBMISSIONS */}
+                        <Button asChild size="sm">
+                          <Link href={`/dashboard/forms/${form.id}/submissions`}>Submissions</Link>
+                        </Button>
+
+                        {/* MORE ACTIONS */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <IconDotsVertical size={18} />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/form/${form.id}`} target="_blank">
+                                <IconEye />
+                                Preview Form
+                              </Link>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  `${window.location.origin}/form/${form.id}`,
+                                );
+
+                                toast.success("Form link copied");
+                              }}
+                            >
+                              <IconCopy />
+                              Copy Form Link
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
+
+                            <DropdownMenuItem className="text-destructive">
+                              <IconTrash />
+                              Delete Form
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
