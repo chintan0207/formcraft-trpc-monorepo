@@ -13,7 +13,6 @@ export const formsSubmissionsTable = pgTable("forms_submissions", {
   id: uuid("id").primaryKey().defaultRandom(),
 
   formId: uuid("form_id").references(() => formsTable.id),
-  formFieldId: uuid("form_field_id").references(() => formFieldsTable.id),
 
   values: json("values").$type<FormSubmissionValueRow>(),
 
