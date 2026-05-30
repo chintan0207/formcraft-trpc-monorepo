@@ -14,6 +14,10 @@ import {
   getFieldOutputModel,
   getFieldsByFormIdInputModel,
   getFieldsByFormIdOutputModel,
+  getFormSubmissionByIdInputModel,
+  getFormSubmissionByIdOutputModel,
+  getFormSubmissionsByFormIdInputModel,
+  getFormSubmissionsByFormIdOutputModel,
   getPublicFormByIdInputModel,
   getPublicFormByIdOutputModel,
   listFormByUserIdInputModel,
@@ -80,6 +84,35 @@ export const formRouter = router({
     .mutation(async ({ input }) => {
       const { id } = await formSubmissionService.createSubmission(input);
       return { id };
+    }),
+
+  getSubmissionById: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/getSubmissionById"),
+        tags: TAGS,
+      },
+    })
+    .input(getFormSubmissionByIdInputModel)
+    .output(getFormSubmissionByIdOutputModel)
+    .query(async ({ input }) => {
+      return await formSubmissionService.getSubmissionById(input);
+    }),
+
+  getSubmissionsByFormId: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/getSubmissionsByFormId"),
+        tags: TAGS,
+        protect: true,
+      },
+    })
+    .input(getFormSubmissionsByFormIdInputModel)
+    .output(getFormSubmissionsByFormIdOutputModel)
+    .query(async ({ input }) => {
+      return await formSubmissionService.getSubmissionsByFormId(input);
     }),
 
   createField: authenticatedProcedure

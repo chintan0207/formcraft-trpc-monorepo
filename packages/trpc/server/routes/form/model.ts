@@ -108,6 +108,31 @@ export const createFormSubmissionOutputModel = z.object({
   id: z.string().describe("id of the created form submission"),
 });
 
+export const formSubmissionValueModel = z.object({
+  fieldId: z.string().describe("uuid of the submitted form field"),
+  value: z.string().describe("submitted value for the field"),
+});
+
+export const formSubmissionOutputModel = z.object({
+  id: z.string().describe("id of the form submission"),
+  formId: z.string().nullable().describe("id of the form"),
+  values: z.array(formSubmissionValueModel).describe("submitted values for the form"),
+  createdAt: z.date().nullable().describe("date when the submission was created"),
+  updatedAt: z.date().nullable().describe("date when the submission was last updated"),
+});
+
+export const getFormSubmissionByIdInputModel = z.object({
+  id: z.string().describe("uuid of the submission"),
+});
+
+export const getFormSubmissionByIdOutputModel = formSubmissionOutputModel;
+
+export const getFormSubmissionsByFormIdInputModel = z.object({
+  formId: z.string().describe("uuid of the form"),
+});
+
+export const getFormSubmissionsByFormIdOutputModel = z.array(formSubmissionOutputModel);
+
 export const updateFieldInputModel = z.object({
   id: z.string().describe("uuid of the field"),
   label: z
