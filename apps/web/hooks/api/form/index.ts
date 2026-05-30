@@ -83,8 +83,9 @@ export const useCreateField = () => {
 };
 
 export const useGetField = (id: string) => {
-  const { data, error, isError, isLoading, isSuccess, status } =
-    trpc.form.getField.useQuery({ id });
+  const { data, error, isError, isLoading, isSuccess, status } = trpc.form.getField.useQuery({
+    id,
+  });
 
   return {
     data,
@@ -177,6 +178,20 @@ export const useDeleteField = () => {
     isError,
     isIdle,
     isPending,
+    isSuccess,
+    status,
+  };
+};
+
+export const useGetFormById = (formId: string) => {
+  const { data, error, isError, isLoading, isSuccess, status } =
+    trpc.form.getPublicFormById.useQuery({ formId });
+
+  return {
+    data,
+    error,
+    isError,
+    isLoading,
     isSuccess,
     status,
   };
