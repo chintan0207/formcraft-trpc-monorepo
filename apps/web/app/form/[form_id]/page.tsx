@@ -4,13 +4,13 @@ import { useState } from "react";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
-import { trpc } from "~/trpc/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Spinner } from "~/components/ui/spinner";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { useParams } from "next/navigation";
+import { useCreateFormSubmission, useGetFormById } from "~/hooks/api/form";
 
 interface FormFieldValue {
   [key: string]: string | boolean | undefined;
@@ -22,14 +22,12 @@ export default function PublicFormPage() {
   const [formData, setFormData] = useState<FormFieldValue>({});
   const [submitted, setSubmitted] = useState(false);
 
-  // Fetch the public form
+  const { data: form, isLoading, error } = useGetFormById(formId);
   const {
-    data: form,
-    isLoading,
-    error,
-  } = trpc.form.getPublicFormById.useQuery({
-    formId: formId,
-  });
+    createFormSubmissionAsync,
+    isPending: isSubmitting,
+    error: submissionError,
+  } = useCreateFormSubmission();
 
   const handleInputChange = (fieldId: string, value: string | boolean) => {
     setFormData((prev) => ({
@@ -38,9 +36,20 @@ export default function PublicFormPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    if (!formId) return;
+
+    const values = sortedFields.map((field) => ({
+      fieldId: field.id,
+      value: String(formData[field.id] ?? ""),
+    }));
+
+    await createFormSubmissionAsync({
+      formId,
+      values,
+    });
+
     setSubmitted(true);
   };
 
@@ -215,9 +224,17 @@ export default function PublicFormPage() {
                 )}
 
                 {sortedFields.length > 0 && (
-                  <Button type="submit" className="w-full">
-                    Submit Form
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Submitting..." : "Submit Form"}
                   </Button>
+                )}
+                {submissionError && (
+                  <Alert variant="destructive" className="mt-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {submissionError.message || "Unable to submit the form. Please try again."}
+                    </AlertDescription>
+                  </Alert>
                 )}
               </form>
             )}

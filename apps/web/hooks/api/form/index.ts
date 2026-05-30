@@ -196,3 +196,36 @@ export const useGetFormById = (formId: string) => {
     status,
   };
 };
+
+export const useCreateFormSubmission = () => {
+  const utils = trpc.useUtils();
+  const {
+    mutateAsync: createFormSubmissionAsync,
+    mutate: createFormSubmission,
+    data,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isPending,
+    isSuccess,
+    status,
+  } = trpc.form.createFormSubmission.useMutation({
+    onSuccess: async () => {
+      await utils.form.getPublicFormById.invalidate();
+    },
+  });
+
+  return {
+    createFormSubmissionAsync,
+    createFormSubmission,
+    data,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isPending,
+    isSuccess,
+    status,
+  };
+};

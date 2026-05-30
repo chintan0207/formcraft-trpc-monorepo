@@ -91,6 +91,23 @@ export const getPublicFormByIdOutputModel = z.object({
   fields: z.array(fieldOutputModel).describe("fields belonging to the form"),
 });
 
+export const createFormSubmissionInputModel = z.object({
+  formId: z.string().describe("uuid of the form being submitted"),
+  values: z
+    .array(
+      z.object({
+        fieldId: z.string().describe("uuid of the submitted form field"),
+        value: z.string().describe("submitted value for the field"),
+      }),
+    )
+    .min(1, "At least one submitted field value is required")
+    .describe("submitted values for the form"),
+});
+
+export const createFormSubmissionOutputModel = z.object({
+  id: z.string().describe("id of the created form submission"),
+});
+
 export const updateFieldInputModel = z.object({
   id: z.string().describe("uuid of the field"),
   label: z
