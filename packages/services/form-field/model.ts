@@ -13,7 +13,7 @@ export const createFieldInput = z.object({
   description: z.string().optional().describe("description of the field"),
   placeholder: z.string().optional().describe("placeholder of the field"),
   isRequired: z.boolean().optional().describe("whether the field is required"),
-  index: fieldIndexModel.describe("fractional index used for sorting fields"),
+  index: fieldIndexModel.optional().describe("fractional index used for sorting fields"),
   type: fieldTypeModel.describe("type of the field"),
   formId: z.string().describe("uuid of the form that owns the field"),
 });
