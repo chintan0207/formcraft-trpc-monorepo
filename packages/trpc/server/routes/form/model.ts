@@ -30,6 +30,10 @@ export const listFormByUserIdOutputModel = z.array(
   }),
 );
 
+export const getPublicFormByIdInputModel = z.object({
+  formId: z.string().describe("uuid of the public form"),
+});
+
 export const fieldTypeModel = z.enum(["TEXT", "NUMBER", "EMAIL", "YES_NO", "PASSWORD"]);
 
 const fieldIndexModel = z.union([z.number(), z.string()]).transform((value) => String(value));
@@ -77,6 +81,15 @@ export const getFieldsByFormIdInputModel = z.object({
 });
 
 export const getFieldsByFormIdOutputModel = z.array(fieldOutputModel);
+
+export const getPublicFormByIdOutputModel = z.object({
+  id: z.string().describe("id of the form"),
+  title: z.string().describe("title of the form"),
+  description: z.string().nullable().describe("description of the form"),
+  createdAt: z.date().nullable().describe("date when the form was created"),
+  updatedAt: z.date().nullable().describe("date when the form was last updated"),
+  fields: z.array(fieldOutputModel).describe("fields belonging to the form"),
+});
 
 export const updateFieldInputModel = z.object({
   id: z.string().describe("uuid of the field"),
