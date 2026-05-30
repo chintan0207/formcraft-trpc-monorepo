@@ -229,3 +229,32 @@ export const useCreateFormSubmission = () => {
     status,
   };
 };
+
+export const useGetFormSubmissionById = (id: string) => {
+  const { data, error, isError, isLoading, isSuccess, status } =
+    trpc.form.getSubmissionById.useQuery({ id });
+
+  return {
+    data,
+    error,
+    isError,
+    isLoading,
+    isSuccess,
+    status,
+  };
+};
+
+export const useGetFormSubmissionsByFormId = (formId: string) => {
+  const { data, error, isError, isLoading, isSuccess, status } =
+    trpc.form.getSubmissionsByFormId.useQuery({ formId }) ;
+
+  return {
+    data,
+    error,
+    isError,
+    isLoading,
+    isSuccess,
+    status,
+  };
+
+}

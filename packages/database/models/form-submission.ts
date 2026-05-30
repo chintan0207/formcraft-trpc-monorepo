@@ -1,6 +1,5 @@
 import { pgTable, uuid, varchar, timestamp, text, json } from "drizzle-orm/pg-core";
 import { formsTable } from "./form";
-import { formFieldsTable } from "./form-field";
 
 export interface FormSubmissionValue {
   fieldId: string;

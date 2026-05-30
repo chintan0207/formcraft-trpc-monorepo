@@ -25,8 +25,8 @@ export const listFormByUserIdOutputModel = z.array(
     title: z.string().describe("title of the form"),
     description: z.string().nullable().describe("description of the form"),
     createdBy: z.string().nullable().describe("id of the user who created the form"),
-    createdAt: z.date().nullable().describe("date when the form was created"),
-    updatedAt: z.date().nullable().describe("date when the form was last updated"),
+    createdAt: z.date().describe("date when the form was created"),
+    updatedAt: z.date().describe("date when the form was last updated"),
   }),
 );
 
@@ -70,8 +70,8 @@ export const fieldOutputModel = z.object({
   index: z.string().describe("fractional index used for sorting fields"),
   type: fieldTypeModel.describe("type of the field"),
   formId: z.string().nullable().describe("id of the form that owns the field"),
-  createdAt: z.date().nullable().describe("date when the field was created"),
-  updatedAt: z.date().nullable().describe("date when the field was last updated"),
+  createdAt: z.date().describe("date when the field was created"),
+  updatedAt: z.date().describe("date when the field was last updated"),
 });
 
 export const getFieldOutputModel = fieldOutputModel;
@@ -86,8 +86,8 @@ export const getPublicFormByIdOutputModel = z.object({
   id: z.string().describe("id of the form"),
   title: z.string().describe("title of the form"),
   description: z.string().nullable().describe("description of the form"),
-  createdAt: z.date().nullable().describe("date when the form was created"),
-  updatedAt: z.date().nullable().describe("date when the form was last updated"),
+  createdAt: z.date().describe("date when the form was created"),
+  updatedAt: z.date().describe("date when the form was last updated"),
   fields: z.array(fieldOutputModel).describe("fields belonging to the form"),
 });
 
@@ -117,8 +117,8 @@ export const formSubmissionOutputModel = z.object({
   id: z.string().describe("id of the form submission"),
   formId: z.string().nullable().describe("id of the form"),
   values: z.array(formSubmissionValueModel).describe("submitted values for the form"),
-  createdAt: z.date().nullable().describe("date when the submission was created"),
-  updatedAt: z.date().nullable().describe("date when the submission was last updated"),
+  createdAt: z.date().describe("date when the submission was created"),
+  updatedAt: z.date().describe("date when the submission was last updated"),
 });
 
 export const getFormSubmissionByIdInputModel = z.object({
